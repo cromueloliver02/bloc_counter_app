@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'blocs/counter/counter_bloc.dart';
 
 void main() => runApp(const MyApp());
 
@@ -7,13 +9,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Bloc Counter App',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return BlocProvider<CounterBloc>(
+      create: (context) => CounterBloc(),
+      child: MaterialApp(
+        title: 'Bloc Counter App',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const HomePage(),
       ),
-      home: const HomePage(),
     );
   }
 }
@@ -23,24 +28,29 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bloc = context.read<CounterBloc>();
+
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: const [
-            Text(
+          children: [
+            const Text(
               'Count',
               style: TextStyle(
                 fontSize: 25,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 20),
-            Text(
-              '0',
-              style: TextStyle(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
+            const SizedBox(height: 20),
+            BlocSelector<CounterBloc, CounterState, int>(
+              selector: (state) => state.counter,
+              builder: (ctx, counter) => Text(
+                '$counter',
+                style: const TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -51,13 +61,13 @@ class HomePage extends StatelessWidget {
         children: [
           FloatingActionButton(
             heroTag: UniqueKey(),
-            onPressed: () {},
+            onPressed: () => bloc.add(DecrementCounterEvent()),
             child: const Icon(Icons.remove),
           ),
           const SizedBox(width: 10),
           FloatingActionButton(
             heroTag: UniqueKey(),
-            onPressed: () {},
+            onPressed: () => bloc.add(IncrementCounterEvent()),
             child: const Icon(Icons.add),
           )
         ],
